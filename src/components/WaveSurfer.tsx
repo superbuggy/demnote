@@ -6,6 +6,13 @@ const { useRef, useState, useEffect, useCallback } = React;
 // Import WaveSurfer
 import WaveSurfer from "wavesurfer.js";
 
+const formatSeconds = (durationInSeconds: number): string => {
+  const minutesExact = durationInSeconds/60;
+  const minutes = Math.floor(minutesExact);
+  const seconds = `${Math.round(60 * (minutesExact - minutes))}`.padStart(2, '0');
+  return `${minutes}:${seconds}`;
+};
+
 // WaveSurfer hook
 const useWaveSurfer = (containerRef, options) => {
   const [waveSurfer, setWaveSurfer] = useState(null);
@@ -48,7 +55,7 @@ export const WaveSurferPlayer = (props) => {
   // or any of the props change
   useEffect(() => {
     if (!waveSurfer) return;
-
+    console.log(waveSurfer);
     setCurrentTime(0);
     setIsPlaying(false);
 
@@ -66,14 +73,17 @@ export const WaveSurferPlayer = (props) => {
 
   return (
     <>
-      <div ref={containerRef} style={{ minHeight: "120px", display: hasLoaded ? 'block' : 'none' }} />
-      {!hasLoaded&&<h1>Loading...</h1>}
+      <div
+        ref={containerRef}
+        style={{ minHeight: "120px", display: hasLoaded ? "block" : "none" }}
+      />
+      {!hasLoaded && <h1>Loading...</h1>}
 
       <button onClick={onPlayClick} style={{ marginTop: "1em" }}>
         {isPlaying ? "Pause" : "Play"}
       </button>
 
-      <p>Seconds played: {currentTime}</p>
+      <p>{formatSeconds(currentTime)}</p>
     </>
-  )
+  );
 };
