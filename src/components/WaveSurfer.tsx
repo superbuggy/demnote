@@ -43,7 +43,7 @@ const useWaveSurfer = (containerRef, options) => {
 // Create a React component that will render waveSurfer.
 // Props are waveSurfer options.
 export const WaveSurferPlayer = (props) => {
-  const containerRef = useRef();
+  const containerRef = useRef(null);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
