@@ -22,12 +22,14 @@ model User {
 }
 
 model Comment {
-  id          String     @id @default(cuid())
-  userId      String?
-  audioFileId String?
-  subject     AudioFile? @relation(fields: [audioFileId], references: [id])
-  author      User?      @relation(fields: [userId], references: [id])
+  id          String    @id @default(cuid())
+  userId      String
+  audioFileId String
+  subject     AudioFile @relation(fields: [audioFileId], references: [id])
+  author      User      @relation(fields: [userId], references: [id])
   text        String
+  timestamp   Int
+  title       String
 }
 
 model AudioFile {
