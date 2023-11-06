@@ -1,27 +1,17 @@
-export type AudioFile = {
-  id: string;
-  name: string;
-  url: string;
-  length: number;
-  comments: Comment[];
-};
+import { Prisma } from "@prisma/client";
 
-export type User = {
-  id: string;
-  email: string;
-  name: string;
-  comments: Comment[];
-  createdAt: string;
-  updatedAt: string;
-};
+const audioFileWithRelations = Prisma.validator<Prisma.AudioFileDefaultArgs>()({
+  include: { comments: true },
+});
 
-export type Comment = {
-  id: string;
-  userId: string;
-  audioFileId: string;
-  subject: AudioFile;
-  author: User;
-  text: string;
-  title: string;
-  timestamp: number;
-};
+const commentWithRelations = Prisma.validator<Prisma.CommentDefaultArgs>()({
+  include: { subject: true, author: true },
+});
+
+const userWithRelations = Prisma.validator<Prisma.UserDefaultArgs>()({
+  include: { comments: true },
+});
+
+export type AudioFile = Prisma.AudioFileGetPayload<typeof audioFileWithRelations>
+export type Comment = Prisma.CommentGetPayload<typeof commentWithRelations>
+export type User = Prisma.UserGetPayload<typeof userWithRelations>
