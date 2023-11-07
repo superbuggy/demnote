@@ -28,7 +28,8 @@ model Comment {
   subject     AudioFile @relation(fields: [audioFileId], references: [id])
   author      User      @relation(fields: [userId], references: [id])
   text        String
-  timestamp   Int
+  startTime   Int
+  endTime     Int
   title       String
 }
 
