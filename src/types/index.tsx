@@ -12,6 +12,7 @@ const userWithRelations = Prisma.validator<Prisma.UserDefaultArgs>()({
   include: { comments: true },
 });
 
-export type AudioFile = Prisma.AudioFileGetPayload<typeof audioFileWithRelations>
-export type Comment = Prisma.CommentGetPayload<typeof commentWithRelations>
-export type User = Prisma.UserGetPayload<typeof userWithRelations>
+export type { AudioFile, Comment, User } from "@prisma/client"
+export type AudioFileWithRelations = Prisma.AudioFileGetPayload<typeof audioFileWithRelations>
+export type CommentWithRelations = Prisma.CommentGetPayload<typeof commentWithRelations>
+export type UserWithRelations = Prisma.UserGetPayload<typeof userWithRelations>
