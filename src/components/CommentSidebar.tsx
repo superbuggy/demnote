@@ -1,8 +1,7 @@
 import { useCallback } from "react";
-import styles from "../app/page.module.css";
+import { formatSeconds } from "../helpers";
 
-export default function Comments(props) {
-  console.log(props)
+export default function CommentsSideBar(props) {
   const makeHandler = useCallback(
     (id) => () => {
       props.showComment(id);
@@ -16,16 +15,20 @@ export default function Comments(props) {
       <ul>
         {props.comments.map((comment) => (
           <li onMouseOver={makeHandler(comment.id)} key={comment.id}>
-            •{comment.title}
+            [{formatSeconds(comment.startTime)} - {formatSeconds(comment.endTime)}] {comment.title}{" "}
+            <span>({comment.author.name})</span>
           </li>
         ))}
-        {/* <li>Comment #1</li>
-        <li>Comment #2</li>
-        <li>Comment #3</li> */}
       </ul>
       <style jsx>{`
+        ul {
+          padding-left: 2em;
+        }
         aside {
           grid-column: 1 / 2;
+        }
+        li span {
+          font-style: italic;
         }
       `}</style>
     </aside>
