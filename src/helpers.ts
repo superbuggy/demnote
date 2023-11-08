@@ -7,3 +7,11 @@ export const formatSeconds = (durationInSeconds: number): string => {
   );
   return `${minutes}:${seconds}`;
 };
+
+export const lexicalizeWith = (keys: string[], values: any[]): Record<string, any> =>
+  Object.fromEntries(
+    Array.from({ length: keys.length }, (_, i) => [keys[i], values[i]])
+  );
+
+
+  export const selectIn = (field, things) => things.map(thing => thing[field])
