@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./page.module.css";
-import WavePlayer from "../components/WavePlayer";
+import { PlayerPanel } from "../components/PlayerPanel";
 import CommentsSidebar from "../components/CommentSidebar";
 import CommentDetails from "../components/CommentDetails";
 import { useEffect, useState, useCallback } from "react";
@@ -10,7 +10,7 @@ import { AudioFileWithRelations, Comment } from "../types";
 export default function Home() {
   const [audioFile, setAudioFile] = useState<AudioFileWithRelations>();
   const [audioFiles, setAudioFiles] = useState<AudioFileWithRelations[]>([]);
-  const [shownComment, setShownComment] = useState<Comment>();
+  const [shownComment, setShownComment] = useState<Comment | null>(null);
 
   const onUrlChange = useCallback(
     (event) => {
@@ -24,11 +24,12 @@ export default function Home() {
   );
 
   const showComment = useCallback(
-    (id) => {
+    (id: string | null) => {
       const commentToShow = audioFile?.comments.find(
         (comment) => id === comment.id
       );
-      if (commentToShow) setShownComment(commentToShow);
+      // if (commentToShow) 
+      setShownComment(commentToShow || null);
     },
     [audioFile?.comments]
   );
@@ -48,7 +49,10 @@ export default function Home() {
       <h1 className={styles.center}>Demnote</h1>
       {audioFile && (
         <main className={styles.main}>
-          <CommentsSidebar comments={audioFile.comments} showComment={showComment} />
+          <CommentsSidebar
+            comments={audioFile.comments}
+            showComment={showComment}
+          />
           <section className={styles["main-player"]}>
             <select onChange={onUrlChange} value={audioFile.url}>
               {audioFiles.map(({ name, url }) => (
@@ -57,7 +61,12 @@ export default function Home() {
                 </option>
               ))}
             </select>
-            <WavePlayer audioUrl={audioFile.url} comments={audioFile.comments} showComment={showComment}/>
+            <PlayerPanel
+              audioUrl={audioFile.url}
+              comments={audioFile.comments}
+              showComment={showComment}
+              shownComment={shownComment}
+            />
           </section>
           <CommentDetails shownComment={shownComment} />
         </main>
