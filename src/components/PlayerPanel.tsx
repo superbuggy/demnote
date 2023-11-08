@@ -1,6 +1,8 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState } from "react";
 import WaveSurferPlayer from "./WaveSurfer";
 import { useWaveSurfer } from "../hooks/useWaveSurfer";
+import { useRegionsPlugin } from "../hooks/useRegionsPlugin";
+import { useCommentEditing } from "../hooks/useCommentEditing";
 import { formatSeconds } from "../helpers";
 import { CommentWithRelations, Comment } from "../types";
 import { Tooltip } from "react-tooltip";
@@ -27,8 +29,15 @@ export const PlayerPanel: React.FC<WavePlayerProps> = ({
 
   const containerRef = useRef(null);
   const height = 48;
+  const { setCommentEditingState, editingState } = useCommentEditing(comments);
+  const { regionsPlugin, drawRegions } = useRegionsPlugin(
+    comments,
+    showComment,
+    editingState
+  );
   const { isPlaying, hasLoaded, duration, currentTime, onClick } =
-    useWaveSurfer(containerRef, audioUrl, comments, showComment);
+    useWaveSurfer(containerRef, audioUrl, regionsPlugin, drawRegions);
+  // useWaveSurfer(containerRef, audioUrl, comments, showComment, editingState);
 
   const commentMarkers = comments.map((comment) => (
     <circle
@@ -51,7 +60,12 @@ export const PlayerPanel: React.FC<WavePlayerProps> = ({
       clickable
       isOpen={shownComment?.id === comment.id}
     >
-      <CommentDetails shownComment={comment} />
+      <CommentDetails
+        setCommentEditingState={setCommentEditingState}
+        commentEditingState={editingState[comment.id]}
+        comment={comment}
+        isInTooltip
+      />
     </Tooltip>
   ));
 

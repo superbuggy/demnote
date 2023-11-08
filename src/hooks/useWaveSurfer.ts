@@ -4,16 +4,16 @@ import { WaveSurferOptions } from "wavesurfer.js";
 
 import WaveSurfer from "wavesurfer.js";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
-import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.js";
 
 // WaveSurfer hook
 export const useWaveSurfer = (
   containerRef,
   audioUrl,
-  comments,
-  showComment,
+  regionsPlugin,
+  drawRegions
 ) => {
   const [waveSurfer, setWaveSurfer] = useState<WaveSurfer>();
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -47,39 +47,37 @@ export const useWaveSurfer = (
     };
   }, [waveSurfer]);
 
+  // Draw Regions after audio file is decoded
   useEffect(() => {
-    const regionsPlugin = RegionsPlugin.create();
-    const timelinePlugin = TimelinePlugin.create();
+    if (!waveSurfer) return;
 
+    waveSurfer.registerPlugin(regionsPlugin);
+    waveSurfer.on("decode", drawRegions);
+  }, [waveSurfer, regionsPlugin, drawRegions]);
+
+  // Draw regions after there's been an update to the drawRegions function
+  // ie after and editing state change for comments
+  useEffect(() => {
+    if (!waveSurfer) return;
+    drawRegions();
+  }, [waveSurfer, drawRegions]);
+
+  useEffect(() => {
+    const timelinePlugin = TimelinePlugin.create();
     const waveSurferInstance = WaveSurfer.create({
       height: 100,
       waveColor: "rgb(200, 0, 200)",
       progressColor: "rgb(100, 0, 100)",
       url: audioUrl,
-      plugins: [timelinePlugin, regionsPlugin],
+      plugins: [timelinePlugin],
       container: containerRef.current,
     } as WaveSurferOptions);
 
     setWaveSurfer(() => waveSurferInstance);
-    waveSurferInstance.on("decode", () => {
-      comments.forEach((comment) => {
-        const region = regionsPlugin.addRegion({
-          start: comment.startTime,
-          end: comment.endTime,
-          content: comment.title,
-          color: "#8ABA7855",
-          drag: true, // TODO: isAuthorCurrentUser
-          resize: true, // TODO: isAuthorCurrentUser
-          id: `comment-region-${comment.id}`,
-        });
-        region.on("over", () => showComment(comment.id));
-        region.on("leave", () => showComment(null));
-      });
-    });
     return () => {
       waveSurferInstance.destroy();
     };
-  }, [audioUrl, containerRef, comments, setWaveSurfer, showComment]);
+  }, [audioUrl, containerRef, setWaveSurfer]);
 
   return {
     waveSurfer,
