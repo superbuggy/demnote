@@ -3,32 +3,21 @@ import { useState, useEffect, useCallback } from "react";
 import { WaveSurferOptions } from "wavesurfer.js";
 
 import WaveSurfer from "wavesurfer.js";
-import Timeline from "wavesurfer.js/dist/plugins/timeline.js";
+import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline.js";
+import RegionsPlugin from "wavesurfer.js/dist/plugins/regions.js";
 
 // WaveSurfer hook
-export const useWaveSurfer = (containerRef, audioUrl) => {
+export const useWaveSurfer = (
+  containerRef,
+  audioUrl,
+  comments,
+  showComment,
+) => {
   const [waveSurfer, setWaveSurfer] = useState<WaveSurfer>();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [hasLoaded, setHasLoaded] = useState(false);
-
-  useEffect(() => {
-    const waveSurferInstance = WaveSurfer.create({
-      height: 100,
-      waveColor: "rgb(200, 0, 200)",
-      progressColor: "rgb(100, 0, 100)",
-      url: audioUrl,
-      plugins: [Timeline.create()],
-      container: containerRef.current,
-    } as WaveSurferOptions);
-
-    setWaveSurfer(() => waveSurferInstance);
-
-    return () => {
-      waveSurferInstance.destroy();
-    };
-  }, [audioUrl, containerRef, setWaveSurfer]);
 
   const onClick = useCallback(() => {
     setIsPlaying((isPlaying) => !isPlaying);
@@ -57,6 +46,40 @@ export const useWaveSurfer = (containerRef, audioUrl) => {
       setHasLoaded(false);
     };
   }, [waveSurfer]);
+
+  useEffect(() => {
+    const regionsPlugin = RegionsPlugin.create();
+    const timelinePlugin = TimelinePlugin.create();
+
+    const waveSurferInstance = WaveSurfer.create({
+      height: 100,
+      waveColor: "rgb(200, 0, 200)",
+      progressColor: "rgb(100, 0, 100)",
+      url: audioUrl,
+      plugins: [timelinePlugin, regionsPlugin],
+      container: containerRef.current,
+    } as WaveSurferOptions);
+
+    setWaveSurfer(() => waveSurferInstance);
+    waveSurferInstance.on("decode", () => {
+      comments.forEach((comment) => {
+        const region = regionsPlugin.addRegion({
+          start: comment.startTime,
+          end: comment.endTime,
+          content: comment.title,
+          color: "#8ABA7855",
+          drag: true, // TODO: isAuthorCurrentUser
+          resize: true, // TODO: isAuthorCurrentUser
+          id: `comment-region-${comment.id}`,
+        });
+        region.on("over", () => showComment(comment.id));
+        region.on("leave", () => showComment(null));
+      });
+    });
+    return () => {
+      waveSurferInstance.destroy();
+    };
+  }, [audioUrl, containerRef, comments, setWaveSurfer, showComment]);
 
   return {
     waveSurfer,
